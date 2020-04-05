@@ -1,5 +1,5 @@
 {
-	"name": "kdyby/parse-use-statements",
+	"name": "aesonus/parse-use-statements",
 	"type": "library",
 	"description": "Parse use statements for a reflection object",
 	"keywords": ["kdyby", "use", "uses", "usages", "import", "statement", "parse", "expand", "class", "reflection"],
