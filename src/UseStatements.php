@@ -20,7 +20,11 @@ class UseStatements
 	/** @var array */
 	private static $cache = [];
 
-
+    /**
+     * 
+     * @var mixed
+     */
+    private static $array_pointer;
 
 	/**
 	 * Expands class name into full name.
@@ -91,11 +95,12 @@ class UseStatements
 	 */
 	public static function parseUseStatements($code, $forClass = NULL)
 	{
+        self::$array_pointer = 0;
 		$tokens = token_get_all($code);
 		$namespace = $class = $classLevel = $level = NULL;
 		$res = $uses = [];
 
-		while (list(, $token) = each($tokens)) {
+		while (list(, $token) = self::each($tokens)) {
 			switch (is_array($token) ? $token[0] : $token) {
 				case T_NAMESPACE:
 					$namespace = ltrim(self::fetch($tokens, [T_STRING, T_NS_SEPARATOR]) . '\\', '\\');
@@ -166,16 +171,38 @@ class UseStatements
 	private static function fetch(& $tokens, $take)
 	{
 		$res = NULL;
-		while ($token = current($tokens)) {
+		while ($token = self::current($tokens)) {
 			list($token, $s) = is_array($token) ? $token : [$token, $token];
 			if (in_array($token, (array) $take, TRUE)) {
 				$res .= $s;
 			} elseif (!in_array($token, [T_DOC_COMMENT, T_WHITESPACE, T_COMMENT], TRUE)) {
 				break;
 			}
-			next($tokens);
+			self::next($tokens);
 		}
 		return $res;
 	}
+    
+    private static function each($tokens): ?array
+    {
+        $value = $tokens[self::$array_pointer] ?? null;
+        if ($value) {
+            self::$array_pointer ++;
+            return [self::$array_pointer - 1, $value];
+        } else {
+            return null;
+        }
+    }
+    
+    private static function current($tokens)
+    {
+        return $tokens[self::$array_pointer] ?? null;
+    }
+    
+    private static function next($tokens)
+    {
+        self::$array_pointer ++;
+        return $tokens[self::$array_pointer] ?? null;
+    }
 
 }
